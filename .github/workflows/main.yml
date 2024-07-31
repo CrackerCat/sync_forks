@@ -37,45 +37,45 @@ jobs:
 
           # 遍历所有仓库
           for repo in user.get_repos():
-          try:
-              if repo.fork:  # 如果是 fork 的仓库
-                  print(f"正在同步 {repo.name}")
-                  parent = repo.parent
-                  
-                  # 确保我们有正确的权限
-                  if not repo.permissions.push:
-                      print(f"没有 {repo.name} 的推送权限，跳过")
+            try:
+                if repo.fork:  # 如果是 fork 的仓库
+                    print(f"正在同步 {repo.name}")
+                    parent = repo.parent
+                    
+                    # 确保我们有正确的权限
+                    if not repo.permissions.push:
+                        print(f"没有 {repo.name} 的推送权限，跳过")
+                        continue
+
+                    # 创建一个临时克隆
+                    os.system(f"git clone --quiet https://{os.environ['GITHUB_TOKEN']}@github.com/{repo.full_name}.git")
+                    os.chdir(repo.name)
+
+                    # 添加上游远程并获取
+                    os.system(f"git remote add upstream https://github.com/{parent.full_name}.git")
+                    os.system("git fetch upstream")
+
+                    # 同步所有分支
+                    for branch in repo.get_branches():
+                        os.system(f"git checkout {branch.name}")
+                        os.system(f"git rebase upstream/{branch.name}")
+                        os.system(f"git push -f origin {branch.name}")
+
+                    # 同步所有标签
+                    os.system("git fetch --tags upstream")
+                    os.system("git push --tags origin")
+
+                    # 返回并清理
+                    os.chdir('..')
+                    os.system(f"rm -rf {repo.name}")
+
+                    print(f"{repo.name} 同步完成")
+              except GithubException as e:
+                  if e.status == 403 and "Repository access blocked" in str(e):
+                      print(f"仓库 {repo.name} 访问被阻止，跳过")
                       continue
-
-                  # 创建一个临时克隆
-                  os.system(f"git clone --quiet https://{os.environ['GITHUB_TOKEN']}@github.com/{repo.full_name}.git")
-                  os.chdir(repo.name)
-
-                  # 添加上游远程并获取
-                  os.system(f"git remote add upstream https://github.com/{parent.full_name}.git")
-                  os.system("git fetch upstream")
-
-                  # 同步所有分支
-                  for branch in repo.get_branches():
-                      os.system(f"git checkout {branch.name}")
-                      os.system(f"git rebase upstream/{branch.name}")
-                      os.system(f"git push -f origin {branch.name}")
-
-                  # 同步所有标签
-                  os.system("git fetch --tags upstream")
-                  os.system("git push --tags origin")
-
-                  # 返回并清理
-                  os.chdir('..')
-                  os.system(f"rm -rf {repo.name}")
-
-                  print(f"{repo.name} 同步完成")
-            except GithubException as e:
-                if e.status == 403 and "Repository access blocked" in str(e):
-                    print(f"仓库 {repo.name} 访问被阻止，跳过")
-                    continue
-                else:
-                    print(f"处理仓库 {repo.name} 时发生错误: {str(e)}")
-                    continue  # 或者根据需要处理其他类型的错误
+                  else:
+                      print(f"处理仓库 {repo.name} 时发生错误: {str(e)}")
+                      continue  # 或者根据需要处理其他类型的错误
           print("所有 fork 仓库同步完成")
           EOF
