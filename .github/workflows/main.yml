@@ -2,8 +2,8 @@ name: Sync Forked Repositories
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天午夜运行
-  workflow_dispatch:  # 允许手动触发
+    - cron: "0 0 * * *" # 每天午夜运行
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   sync-forks:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install dependencies
         run: |
@@ -37,7 +37,7 @@ jobs:
 
           # 遍历所有仓库
           for repo in user.get_repos():
-           try:
+          try:
               if repo.fork:  # 如果是 fork 的仓库
                   print(f"正在同步 {repo.name}")
                   parent = repo.parent
@@ -70,12 +70,12 @@ jobs:
                   os.system(f"rm -rf {repo.name}")
 
                   print(f"{repo.name} 同步完成")
-          except GithubException as e:
-              if e.status == 403 and "Repository access blocked" in str(e):
-                  print(f"仓库 {repo.name} 访问被阻止，跳过")
-                  continue
+            except GithubException as e:
+                if e.status == 403 and "Repository access blocked" in str(e):
+                    print(f"仓库 {repo.name} 访问被阻止，跳过")
+                    continue
                 else:
                     print(f"处理仓库 {repo.name} 时发生错误: {str(e)}")
                     continue  # 或者根据需要处理其他类型的错误
           print("所有 fork 仓库同步完成")
-     
+          EOF
