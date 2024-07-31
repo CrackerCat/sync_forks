@@ -29,7 +29,7 @@ jobs:
           git config --global user.email 'sync_forks@gmail.com'
           python - <<EOF
           import os
-          from github import Github
+          from github import Github, GithubException
 
           # 使用个人访问令牌初始化 Github 客户端
           g = Github(os.environ['GITHUB_TOKEN'])
