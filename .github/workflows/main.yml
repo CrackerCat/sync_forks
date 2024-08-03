@@ -25,6 +25,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git config --global user.name 'sync_forks'
+          git config --global user.name 'CrackerCat'
           git config --global user.email 'sync_forks@gmail.com'
           python ./.github/workflows/sync_forks.py
