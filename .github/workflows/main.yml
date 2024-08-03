@@ -27,4 +27,4 @@ jobs:
         run: |
           git config --global user.name 'sync_forks'
           git config --global user.email 'sync_forks@gmail.com'
-          python ${{ github.workspace }}sync_forks.py 
+          python ${{ github.workspace }}/sync_forks.py 
