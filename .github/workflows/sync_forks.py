@@ -58,19 +58,29 @@ def main():
     user = g.get_user()
 
     for repo in user.get_repos():
-        if repo.fork:
-            print(f"检查 {repo.name}")
-            if not repo.permissions.push:
-                print(f"没有 {repo.name} 的推送权限，跳过")
-                continue
-            
-            for branch in repo.get_branches():
-                if needs_update(repo, branch.name):
-                    sync_branch(repo, branch.name)
-                else:
-                    print(f"{repo.name} 的 {branch.name} 分支已是最新，无需更新")
-            
-            print(f"{repo.name} 处理完成")
+        try: 
+            if repo.fork:
+                print(f"检查 {repo.name}")
+                if not repo.permissions.push:
+                    print(f"没有 {repo.name} 的推送权限，跳过")
+                    continue
+                
+                for branch in repo.get_branches():
+                    if needs_update(repo, branch.name):
+                        sync_branch(repo, branch.name)
+                    else:
+                        print(f"{repo.name} 的 {branch.name} 分支已是最新，无需更新")
+                
+                print(f"{repo.name} 处理完成")
+        except GithubException as e:
+            if e.status == 403 and "Repository access blocked" in str(e):
+                print(f"仓库 {repo.name} 访问被阻止，跳过")
+            else:
+                print(f"处理仓库 {repo.name} 时发生错误: {str(e)}")
+            continue
+        except Exception as e:
+            print(f"处理仓库 {repo.name} 时发生未预期的错误: {str(e)}")
+            continue
 
     print("所有可访问的 fork 仓库检查/同步完成")
 
